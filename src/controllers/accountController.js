@@ -48,8 +48,30 @@ const getInfoAccount = async (req, res) => {
   try {
     const { token } = req.body;
     const tokenVerify = jwt.verify(token, "secret_key");
-    const account = await Account.findOne({ _id: tokenVerify.accountId }).select("-__v");
-    res.status(200).json({ account });
+    const account = await Account.findOne({
+      _id: tokenVerify.accountId,
+    }).select("-__v");
+    res.status(200).json(account);
+  } catch (error) {
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+};
+
+const updateInfoAccount = async (req, res) => {
+  try {
+    const { token, password, fullname, birthday, gender, phone } =
+      req.body;
+    const tokenVerify = jwt.verify(token, "secret_key");
+    const account = await Account.findOneAndUpdate(
+      {
+        _id: tokenVerify.accountId,
+      },
+      { password, fullname, birthday, gender, phone },
+      {
+        new: true,
+      }
+    ).select("-__v");
+    res.status(200).json(account);
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
@@ -59,4 +81,5 @@ module.exports = {
   register,
   login,
   getInfoAccount,
+  updateInfoAccount,
 };

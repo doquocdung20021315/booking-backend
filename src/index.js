@@ -6,6 +6,7 @@ const accountRouter = require('./routes/account');
 const doctorRouter = require('./routes/doctor');
 const specialistRouter = require('./routes/specialist');
 const facilityRouter = require('./routes/facility');
+const appointmentRouter = require('./routes/appointment');
 
 const app = express();
 const port = 6262;
@@ -21,6 +22,7 @@ app.use('/account', accountRouter);
 app.use('/doctor', doctorRouter);
 app.use('/specialist', specialistRouter);
 app.use('/facility', facilityRouter);
+app.use('/appointment', appointmentRouter);
 
 app.get("/", (req, res) => {
   res.send("API");
