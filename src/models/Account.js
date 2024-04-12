@@ -8,6 +8,9 @@ const Account = new Schema({
   birthday: { type: String, required: true },
   gender: { type: String, required: true },
   phone: { type: String, required: true },
+  roleId: { type: String, required: true },
+  facilityID: { type: String },
+  email: { type: String, required: true },
 });
 
 module.exports = mongoose.model('Account', Account);

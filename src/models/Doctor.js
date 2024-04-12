@@ -8,6 +8,7 @@ const Doctor = new Schema({
   specialist: { type: String, required: true },
   price: { type: String, required: true },
   facilityID: { type: String, required: true },
+  doctorID: { type: String, required: true },
 });
 
 module.exports = mongoose.model("Doctor", Doctor);
