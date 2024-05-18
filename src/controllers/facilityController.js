@@ -56,7 +56,7 @@ const addFacility = async (req, res) => {
       service,
     });
     await newFacility.save();
-    res.status(200).json({ message: "Thêm cơ sở thành công" });
+    res.status(200).json({ message: "Thêm cơ sở thành công", newFacility });
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }

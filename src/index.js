@@ -13,7 +13,7 @@ const port = 6262;
 
 connectDB;
 
-app.use(morgan('combined'));
+// app.use(morgan('combined'));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -31,3 +31,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Appointment Booking App listening on port ${port}`);
 });
+
+module.exports = app;

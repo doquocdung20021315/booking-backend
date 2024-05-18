@@ -62,7 +62,7 @@ const addDoctor = async (req, res) => {
       doctorID: docId.toString(),
     });
     await newDoctor.save();
-    res.status(200).json({ message: "Thêm bác sĩ thành công" });
+    res.status(200).json({ message: "Thêm bác sĩ thành công", newDoctor });
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }

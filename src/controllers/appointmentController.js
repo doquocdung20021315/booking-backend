@@ -37,7 +37,7 @@ const book = async (req, res) => {
       status: "1",
     });
     await newAppointment.save();
-    res.status(201).json({ message: "Đặt lịch thành công" });
+    res.status(201).json({ message: "Đặt lịch thành công", newAppointment });
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }

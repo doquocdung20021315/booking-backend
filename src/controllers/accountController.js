@@ -1,26 +1,92 @@
 const Account = require("../models/Account");
 const Facility = require("../models/Facility");
 const jwt = require("jsonwebtoken");
+const nodeMailer = require("nodemailer");
+
+const transporter = nodeMailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: "dqd262002@gmail.com",
+    pass: "tkug wqmb djho kpqp",
+  },
+});
+
+let listNewAcc = [];
 
 const register = async (req, res) => {
   try {
-    const { username, password, fullname, birthday, gender, phone, email } = req.body;
+    const { username, password, fullname, birthday, gender, phone, email } =
+      req.body;
     const existingAccount = await Account.findOne({ username });
     if (existingAccount) {
       return res.status(200).json({ message: "Người dùng đã tồn tại" });
     }
-    const newAccount = new Account({
+    let authenticationId = Math.floor(Math.random() * 10000).toString();
+    listNewAcc.push({
+      authenticationId,
       username,
       password,
       fullname,
       birthday,
       gender,
       phone,
-      roleId: "1",
       email,
     });
-    await newAccount.save();
-    res.status(201).json({ message: "Đăng ký thành công" });
+    const mailOptions = {
+      from: "dqd262002@gmail.com",
+      to: email,
+      subject: "Xác thực tài khoản",
+      text:
+        "Vui lòng sử dụng mã xác thực " +
+        authenticationId +
+        " để tiếp tục đăng ký tài khoản tại ABook",
+    };
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: "Đã gửi mã xác thực", authenticationId });
+  } catch (error) {
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+};
+
+const authenticate = async (req, res) => {
+  try {
+    const { authenId } = req.body;
+    let registerInfo;
+    listNewAcc = listNewAcc.filter((newAcc) => {
+      if (newAcc.authenticationId === authenId) {
+        registerInfo = {
+          username: newAcc.username,
+          password: newAcc.password,
+          fullname: newAcc.fullname,
+          birthday: newAcc.birthday,
+          gender: newAcc.gender,
+          phone: newAcc.phone,
+          email: newAcc.email,
+        };
+      }
+      return newAcc.authenticationId !== authenId;
+    });
+    if (!registerInfo) {
+      return res.status(200).json({ message: "Mã xác thực không đúng" });
+    }
+    if (
+      registerInfo.username &&
+      registerInfo.password &&
+      registerInfo.fullname &&
+      registerInfo.birthday &&
+      registerInfo.gender &&
+      registerInfo.phone &&
+      registerInfo.email
+    ) {
+      const newAccount = new Account({
+        ...registerInfo,
+        roleId: "1",
+      });
+      await newAccount.save();
+    }
+    res.status(200).json({ message: "Xác thực thành công" });
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
@@ -41,7 +107,18 @@ const login = async (req, res) => {
         .json({ message: "Thông tin đăng nhập không chính xác" });
     }
     const token = jwt.sign({ accountId: account._id }, "secret_key");
-    res.status(200).json({ token });
+    let loginInfo;
+    if (account.facilityID) {
+      loginInfo = {
+        roleId: account.roleId,
+        facilityID: account.facilityID,
+      }
+    } else {
+      loginInfo = {
+        roleId: account.roleId,
+      }
+    }
+    res.status(200).json({ token, ...loginInfo });
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
@@ -74,7 +151,8 @@ const getInfoAcc = async (req, res) => {
 
 const updateInfoAccount = async (req, res) => {
   try {
-    const { token, password, fullname, birthday, gender, phone, email } = req.body;
+    const { token, password, fullname, birthday, gender, phone, email } =
+      req.body;
     const tokenVerify = jwt.verify(token, "secret_key");
     const account = await Account.findOneAndUpdate(
       {
@@ -103,17 +181,36 @@ const getAllAccountByNotRole = async (req, res) => {
   }
 };
 
+const getAllAccountByFacilityAndRole = async (req, res) => {
+  try {
+    const { facilityID, roleId } = req.body;
+    const accounts = await Account.find({
+      facilityID,
+      roleId,
+    }).select("-__v -password");
+    res.status(200).json(accounts);
+  } catch (error) {
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+};
+
 const searchAccount = async (req, res) => {
   try {
-    const { accountId, roleId } = req.body;
-    const accounts = await Account.find({
-      roleId: { $regex: roleId ? roleId : "", $ne: "3" },
-    }).select("-__v -password");
+    const { accountId, facilityID, roleId } = req.body;
+    let accounts;
+    if (facilityID) {
+      accounts = await Account.find({
+        facilityID,
+        roleId: { $regex: roleId ? roleId : "", $ne: "3" },
+      }).select("-__v -password");
+    } else {
+      accounts = await Account.find({
+        roleId: { $regex: roleId ? roleId : "", $ne: "3" },
+      }).select("-__v -password");
+    }
     const list = [];
     accounts.map((account) => {
-      if (
-        account._id.toString().includes(accountId ? accountId : "")
-      ) {
+      if (account._id.toString().includes(accountId ? accountId : "")) {
         list.push(account);
       }
     });
@@ -125,7 +222,7 @@ const searchAccount = async (req, res) => {
 
 const createAccount = async (req, res) => {
   try {
-    const { username, fullname, facilityID } = req.body;
+    const { username, fullname, facilityID, roleId } = req.body;
     const existingAccount = await Account.findOne({ username });
     if (existingAccount) {
       return res.status(200).json({ message: "Người dùng đã tồn tại" });
@@ -136,12 +233,12 @@ const createAccount = async (req, res) => {
     }
     const newAccount = new Account({
       username,
-      password: "abc123",
+      password: "new123",
       fullname,
       birthday: "01-01-1990",
       gender: "Nam",
       phone: "0999999999",
-      roleId: "2",
+      roleId,
       facilityID,
       email: "999@gmail.com",
     });
@@ -166,11 +263,13 @@ const deleteAccount = async (req, res) => {
 
 module.exports = {
   register,
+  authenticate,
   login,
   getInfoAccount,
   getInfoAcc,
   updateInfoAccount,
   getAllAccountByNotRole,
+  getAllAccountByFacilityAndRole,
   searchAccount,
   createAccount,
   deleteAccount,

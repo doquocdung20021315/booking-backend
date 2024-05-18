@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon --inspect src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --exit --s 0 --timeout 10000 src/test/api.test.js"
   },
   "keywords": [
     "medical",
@@ -17,7 +17,10 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.1"
+    "mocha": "^10.4.0",
+    "mongoose": "^8.0.1",
+    "nodemailer": "^6.9.13",
+    "supertest": "^6.3.4"
   },
   "devDependencies": {
     "morgan": "^1.10.0",
