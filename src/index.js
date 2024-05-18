@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require('morgan');
 const cors = require('cors');
+require('dotenv').config();
 const connectDB = require('./config/db');
 const accountRouter = require('./routes/account');
 const doctorRouter = require('./routes/doctor');
@@ -9,7 +10,8 @@ const facilityRouter = require('./routes/facility');
 const appointmentRouter = require('./routes/appointment');
 
 const app = express();
-const port = 6262;
+const hostname = process.env.APP_HOST;
+const port = process.env.APP_PORT;
 
 connectDB;
 
@@ -28,8 +30,8 @@ app.get("/", (req, res) => {
   res.send("API");
 });
 
-app.listen(port, () => {
-  console.log(`Appointment Booking App listening on port ${port}`);
+app.listen(port, hostname, () => {
+  console.log(`Appointment Booking App listening at ${hostname}:${port}`);
 });
 
 module.exports = app;

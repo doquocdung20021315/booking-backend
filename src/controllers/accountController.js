@@ -2,14 +2,15 @@ const Account = require("../models/Account");
 const Facility = require("../models/Facility");
 const jwt = require("jsonwebtoken");
 const nodeMailer = require("nodemailer");
+require('dotenv').config();
 
 const transporter = nodeMailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
+  host: process.env.MAIL_HOST,
+  port: process.env.MAIL_PORT,
   secure: false,
   auth: {
-    user: "dqd262002@gmail.com",
-    pass: "tkug wqmb djho kpqp",
+    user: process.env.ADMIN_EMAIL,
+    pass: process.env.ADMIN_PASSWORD,
   },
 });
 
