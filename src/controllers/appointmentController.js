@@ -88,6 +88,18 @@ const deleteAppointmentAccount = async (req, res) => {
   }
 };
 
+const deleteAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    await Appointment.deleteOne({
+      _id: appointmentId,
+    });
+    res.status(200).json("Hủy lịch thành công");
+  } catch (error) {
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+};
+
 const searchAppointment = async (req, res) => {
   try {
     const { accountId, facilityID, specialist, doctorID, date, time, status } =
@@ -162,6 +174,7 @@ module.exports = {
   getAllAppointmentAccount,
   getAllAppointmentFacility,
   deleteAppointmentAccount,
+  deleteAppointment,
   searchAppointment,
   searchAppointmentByObjectId,
   checkAppointment,

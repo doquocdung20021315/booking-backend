@@ -5,6 +5,7 @@ const {
   getAllAppointmentAccount,
   getAllAppointmentFacility,
   deleteAppointmentAccount,
+  deleteAppointment,
   searchAppointment,
   searchAppointmentByObjectId,
   checkAppointment,
@@ -17,6 +18,8 @@ router.post("/getAllAppointmentAccount", getAllAppointmentAccount);
 router.post("/getAllAppointmentFacility", getAllAppointmentFacility);
 
 router.delete("/deleteAppointmentAccount", deleteAppointmentAccount);
+
+router.delete("/deleteAppointment", deleteAppointment);
 
 router.post("/searchAppointment", searchAppointment);
 
