@@ -45,11 +45,11 @@ const book = async (req, res) => {
 
 const getAllAppointmentAccount = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { token, status } = req.body;
     const tokenVerify = jwt.verify(token, "secret_key");
     const appointments = await Appointment.find({
       accountId: tokenVerify.accountId,
-      status: "1",
+      status: !status || status === "1" ? "1" : { $in: ["2", "3"] },
     })
       .select("-__v")
       .sort({ date: 1, time: 1 });
