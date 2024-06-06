@@ -19,6 +19,17 @@ const book = async (req, res) => {
       date,
       time,
     } = req.body;
+    const appointments = await Appointment.find({
+      date,
+    });
+    let appointId = "";
+    if (appointments.length !== 0) {
+      let a = parseInt(appointments[appointments.length - 1].appointmentId) + 1;
+      appointId = a.toString();
+    } else {
+      appointId =
+        date.slice(2, 4) + date.slice(5, 7) + date.slice(8, 10) + "1000";
+    }
     const newAppointment = new Appointment({
       accountId,
       facilityID,
@@ -35,6 +46,7 @@ const book = async (req, res) => {
       date,
       time,
       status: "1",
+      appointmentId: appointId,
     });
     await newAppointment.save();
     res.status(201).json({ message: "Đặt lịch thành công", newAppointment });
@@ -102,8 +114,16 @@ const deleteAppointment = async (req, res) => {
 
 const searchAppointment = async (req, res) => {
   try {
-    const { accountId, facilityID, specialist, doctorID, date, time, status } =
-      req.body;
+    const {
+      accountId,
+      facilityID,
+      specialist,
+      doctorID,
+      date,
+      time,
+      status,
+      appointmentId,
+    } = req.body;
     const appointments = await Appointment.find({
       accountId: { $regex: accountId ? accountId : "" },
       facilityID: { $regex: facilityID ? facilityID : "" },
@@ -112,6 +132,7 @@ const searchAppointment = async (req, res) => {
       date: { $regex: date ? date : "" },
       time: { $regex: time ? time : "" },
       status: { $regex: status ? status : "1" },
+      appointmentId: { $regex: appointmentId ? appointmentId : "" },
     }).sort({ date: 1, time: 1 });
     res.json(appointments);
   } catch (error) {

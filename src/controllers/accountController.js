@@ -72,6 +72,8 @@ const authenticate = async (req, res) => {
     if (!registerInfo) {
       return res.status(200).json({ message: "Mã xác thực không đúng" });
     }
+    const accounts = await Account.find().sort({ accountId: 1 });
+    let accId = parseInt(accounts[accounts.length - 1].accountId) + 1;
     if (
       registerInfo.username &&
       registerInfo.password &&
@@ -84,6 +86,7 @@ const authenticate = async (req, res) => {
       const newAccount = new Account({
         ...registerInfo,
         roleId: "1",
+        accountId: accId.toString(),
       });
       await newAccount.save();
     }
@@ -203,19 +206,15 @@ const searchAccount = async (req, res) => {
       accounts = await Account.find({
         facilityID,
         roleId: { $regex: roleId ? roleId : "", $ne: "3" },
+        accountId: { $regex: accountId ? accountId : "" },
       }).select("-__v -password");
     } else {
       accounts = await Account.find({
         roleId: { $regex: roleId ? roleId : "", $ne: "3" },
+        accountId: { $regex: accountId ? accountId : "" },
       }).select("-__v -password");
     }
-    const list = [];
-    accounts.map((account) => {
-      if (account._id.toString().includes(accountId ? accountId : "")) {
-        list.push(account);
-      }
-    });
-    res.status(200).json(list);
+    res.status(200).json(accounts);
   } catch (error) {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
@@ -232,6 +231,8 @@ const createAccount = async (req, res) => {
     if (!existingFacility) {
       return res.status(200).json({ message: "Cơ sở không tồn tại" });
     }
+    const accounts = await Account.find().sort({ accountId: 1 });
+    let accId = parseInt(accounts[accounts.length - 1].accountId) + 1;
     const newAccount = new Account({
       username,
       password: "new123",
@@ -242,6 +243,7 @@ const createAccount = async (req, res) => {
       roleId,
       facilityID,
       email: "999@gmail.com",
+      accountId: accId.toString(),
     });
     await newAccount.save();
     res.status(201).json({ message: "Tạo tài khoản thành công" });

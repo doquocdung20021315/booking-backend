@@ -11,6 +11,7 @@ const Account = new Schema({
   roleId: { type: String, required: true },
   facilityID: { type: String },
   email: { type: String, required: true },
+  accountId: { type: String, required: true },
 });
 
 module.exports = mongoose.model('Account', Account);
